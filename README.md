@@ -2,7 +2,7 @@
 
 [![asciicast](https://asciinema.org/a/BSuuPRF6HXTe8rgReFmFIzvtj.svg)](https://asciinema.org/a/BSuuPRF6HXTe8rgReFmFIzvtj)
 
-fully independent exploit does not require any 3rd party libs.
+fully independent exploit does not require any 3rd party binaries.
 The exploit spraying the payload to all possible logged HTTP Headers such as `X-Forwarding , Server-IP , User-Agent` 
 ### Usage
 ```shell
