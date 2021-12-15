@@ -45,10 +45,12 @@ SHELL_FLAG = False
 
 def go_clutch(url=None,method="get",data={},headers={}):
     request_headers = {'User-Agent':'Trying to exploit Log4Shell'}
-    request_headers.update(headers)
+    if headers:
+        request_headers.update(headers)
     request_data = {}
     proxies = {}
-    request_data.update(data)
+    if data:
+        request_data.update(data)
     request_func = None
     http_timeout = 120
 
