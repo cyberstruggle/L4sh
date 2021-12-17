@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from utils import *
+from l4sh.utils import *
 import argparse
 import sys
 import os
